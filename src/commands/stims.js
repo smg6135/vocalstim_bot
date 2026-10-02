@@ -318,7 +318,12 @@ async function handleEdit(interaction) {
   const touchedResponseOption = ['content', 'image', 'image_url', 'embed_title', 'embed_description', 'embed_url', 'reply']
     .some((n) => interaction.options.get(n)?.value != null);
   if (touchedResponseOption) {
-    next.responses = [await responseFromOptions(interaction.options, existing.responses[0], interaction.guildId)];
+    // Rebuild only the first response; extra variants (hand-edited in the JSON)
+    // must survive the edit untouched.
+    next.responses = [
+      await responseFromOptions(interaction.options, existing.responses[0], interaction.guildId),
+      ...existing.responses.slice(1),
+    ];
   }
 
   const cooldown = parseCooldown(interaction);

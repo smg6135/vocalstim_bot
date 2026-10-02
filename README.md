@@ -96,7 +96,7 @@ New schema after a `/stim add`:
 }
 ```
 
-For advanced hand-edited responses, you can use `embed` (full title/description/url/color/image/thumbnail/footer/author/fields), `embeds` (array), `files` (paths or URLs), and multiple `responses` (random pick, or `"pick": "all"` on the trigger to send all). Slash-command `/stim edit` manages the first response; use JSON to manage additional responses.
+For advanced hand-edited responses, you can use `embed` (full title/description/url/color/image/thumbnail/footer/author/fields), `embeds` (array), `files` (paths or URLs), and multiple `responses` (random pick, or `"pick": "all"` on the trigger to send all). A stim with several `responses` sends one at random per firing — so if every firing should include an image, put it on every variant. `/stim edit` rewrites only the **first** response and leaves the other variants alone; use the JSON file to edit the rest.
 
 ## Notes
 
