@@ -48,6 +48,13 @@ function matches(trigger, content) {
   }
 }
 
+// Optional per-trigger user restriction: when `users` is a nonempty array of
+// user IDs, only those people can fire the stim; everyone else falls through.
+function userAllowed(trigger, userId) {
+  return !(Array.isArray(trigger.users) && trigger.users.length > 0
+    && !trigger.users.includes(userId));
+}
+
 // ---------------------------------------------------------------------------
 // Response building
 // ---------------------------------------------------------------------------
@@ -291,6 +298,18 @@ function validateTrigger(trigger) {
     errors.push('pick must be "all" or omitted');
   }
 
+  if (trigger.users != null) {
+    if (!Array.isArray(trigger.users) || trigger.users.length > 25) {
+      errors.push('users must be an array of at most 25 user IDs');
+    } else {
+      trigger.users.forEach((id, i) => {
+        if (typeof id !== 'string' || !/^\d{15,22}$/.test(id)) {
+          errors.push(`users[${i}] must be a Discord user ID (15-22 digits)`);
+        }
+      });
+    }
+  }
+
   return { ok: errors.length === 0, errors };
 }
 
@@ -298,6 +317,7 @@ module.exports = {
   MATCH_TYPES,
   compileRegex,
   matches,
+  userAllowed,
   interpolate,
   buildEmbed,
   buildPayload,

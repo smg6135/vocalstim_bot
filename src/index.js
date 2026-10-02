@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const { Client, GatewayIntentBits, Partials } = require('discord.js');
 const store = require('./store');
-const { matches, sendResponse } = require('./triggers');
+const { matches, userAllowed, sendResponse } = require('./triggers');
 const { commandDefinition, handleInteraction, handleAutocomplete } = require('./commands/stims');
 
 // ---------------------------------------------------------------------------
@@ -41,6 +41,7 @@ client.on('messageCreate', async (message) => {
 
     for (const trigger of triggers) {
       if (!matches(trigger, message.content)) continue;
+      if (!userAllowed(trigger, message.author.id)) continue;
 
       // Per-trigger, per-channel cooldown to avoid spamming.
       const cooldownSeconds = trigger.cooldownSeconds ?? store.getCooldownSeconds() ?? 3;

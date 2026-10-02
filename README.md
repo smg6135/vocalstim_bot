@@ -55,6 +55,20 @@ Send a clickable rich link:
 
 Then try `/stim test name:banana message:banana`, `/stim show name:banana`, or `/stim edit name:banana content:🍌🍌🍌`.
 
+### React only to specific people
+
+Use the optional `users` field on `/stim add` or `/stim edit` to restrict who can trigger a stim. Both the message pattern **and** the sender must match:
+
+```text
+/stim add name:alice-banana match_type:contains pattern:banana content:🍌 That's your cue! users:@Alice
+/stim edit name:alice-banana users:@Alice,@Bob
+/stim edit name:alice-banana users:everyone
+```
+
+Insert actual Discord user mentions (not plain display names), or paste comma-separated user IDs. Up to 25 people are supported; duplicates are ignored. On edit, `users` replaces the entire list; omitting it leaves the restriction unchanged. `users:everyone` removes it. New stims without `users` work for everyone.
+
+`/stim show` displays restricted users. `/stim test` is still a private response preview and bypasses the user restriction. A skipped restricted stim does not stop later stims from matching the same message.
+
 ### Match types
 
 | type | behavior |
@@ -95,6 +109,8 @@ New schema after a `/stim add`:
   }
 }
 ```
+
+For hand-edited user restrictions, add `"users": ["123456789012345678"]` at the trigger level (alongside `match` and `responses`). Use Discord user IDs as strings; omitting `users` or setting it to `[]` allows everyone. No migration is needed for existing stims.
 
 For advanced hand-edited responses, you can use `embed` (full title/description/url/color/image/thumbnail/footer/author/fields), `embeds` (array), `files` (paths or URLs), and multiple `responses` (random pick, or `"pick": "all"` on the trigger to send all). A stim with several `responses` sends one at random per firing — so if every firing should include an image, put it on every variant. `/stim edit` rewrites only the **first** response and leaves the other variants alone; use the JSON file to edit the rest.
 

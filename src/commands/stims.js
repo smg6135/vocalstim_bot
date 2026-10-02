@@ -87,6 +87,9 @@ commandBuilder.addSubcommand((sc) => {
     { required: true, maxLength: 500 }));
   sc.addStringOption(stringOption('cooldown_seconds',
     'Minimum seconds between firings in a channel (default 3)'));
+  sc.addStringOption(stringOption('users',
+    'Only these people: comma-separated @mentions or user IDs; "everyone" removes the restriction',
+    { maxLength: 1000 }));
   return responseOptions(sc);
 });
 
@@ -97,6 +100,9 @@ commandBuilder.addSubcommand((sc) => {
     { choices: MATCH_TYPES.map((t) => ({ name: t, value: t })) }));
   sc.addStringOption(stringOption('pattern', 'New trigger phrase or regex pattern', { maxLength: 500 }));
   sc.addStringOption(stringOption('cooldown_seconds', 'New cooldown in seconds'));
+  sc.addStringOption(stringOption('users',
+    'Replace restricted people: comma-separated @mentions or user IDs; "everyone" removes the restriction',
+    { maxLength: 1000 }));
   return responseOptions(sc);
 });
 
@@ -243,6 +249,12 @@ function renderTriggerEmbed(trigger) {
           .slice(0, 1024) || '—',
       },
     );
+  if (trigger.users?.length > 0) {
+    embed.addFields({
+      name: 'Restricted to',
+      value: trigger.users.map((id) => `<@${id}>`).join(', '),
+    });
+  }
   const meta = [
     trigger.createdBy && `created by ${trigger.createdBy}`,
     trigger.updatedBy && `last edited by ${trigger.updatedBy}`,
@@ -270,12 +282,32 @@ function parseCooldown(interaction) {
   return n;
 }
 
+function parseUsers(raw) {
+  if (!raw.trim() || raw.trim().toLowerCase() === 'everyone') return [];
+
+  const ids = raw.split(',').map((part) => {
+    const token = part.trim();
+    const match = /^(?:<@!?(\d{15,22})>|(\d{15,22}))$/.exec(token);
+    if (!match) {
+      throw new CommandError('users must be comma-separated @mentions or user IDs, or "everyone" to remove the restriction.');
+    }
+    return match[1] ?? match[2];
+  });
+  const unique = [...new Set(ids)];
+  if (unique.length > 25) {
+    throw new CommandError('Restrict a stim to at most 25 people.');
+  }
+  return unique;
+}
+
 // ---------------------------------------------------------------------------
 // Subcommand handlers
 // ---------------------------------------------------------------------------
 
 async function handleAdd(interaction) {
   const name = interaction.options.getString('name', true).trim();
+  const rawUsers = interaction.options.getString('users');
+  const users = rawUsers === null ? [] : parseUsers(rawUsers);
   const trigger = {
     name,
     match: {
@@ -288,6 +320,7 @@ async function handleAdd(interaction) {
   };
   const cooldown = parseCooldown(interaction);
   if (cooldown !== undefined) trigger.cooldownSeconds = cooldown;
+  if (users.length > 0) trigger.users = users;
 
   const { ok, errors } = validateTrigger(trigger);
   if (!ok) throw new CommandError(`Validation failed:\n- ${errors.join('\n- ')}`);
@@ -302,6 +335,12 @@ async function handleAdd(interaction) {
 async function handleEdit(interaction) {
   const existing = getTriggerOr404(interaction);
   const next = structuredClone(existing);
+  const rawUsers = interaction.options.getString('users');
+  if (rawUsers !== null) {
+    const users = parseUsers(rawUsers);
+    if (users.length > 0) next.users = users;
+    else delete next.users;
+  }
 
   const matchType = interaction.options.getString('match_type');
   const pattern = interaction.options.getString('pattern');
@@ -382,6 +421,7 @@ async function handleTest(interaction) {
     ? responses
     : [responses[Math.floor(Math.random() * responses.length)]];
 
+  // Private previews bypass the user restriction; this is not a live firing.
   // Synthetic "message" so placeholders resolve like a real firing would.
   const synthetic = {
     author: interaction.user,
