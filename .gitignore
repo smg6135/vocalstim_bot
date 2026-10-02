@@ -1,0 +1,16 @@
+# dependencies
+node_modules/
+
+# secrets — never commit the bot token
+.env
+.env.*
+*.pem
+deploy_key
+deploy_key.pub
+*.key
+id_ed25519*
+
+# runtime state lives on the VM, not in git
+media/
+config/*.tmp
+*.log

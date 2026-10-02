@@ -1,0 +1,40 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      # Only code is synced — config/triggers.json and media/ on the VM hold
+      # runtime state (stims added via /stim) and must not be overwritten.
+      - name: Sync code
+        run: |
+          rsync -av --delete src/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:bot/src/
+          rsync -av package.json package-lock.json ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:bot/
+
+      - name: Install deps and restart
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} '
+            set -e
+            cd ~/bot
+            npm ci --omit=dev
+            sudo -n systemctl restart vocal-stim-bot
+            sleep 3
+            systemctl is-active --quiet vocal-stim-bot && echo "bot is running"
+          '

@@ -1,0 +1,16 @@
+{
+  "name": "vocal-stim-bot",
+  "version": "1.0.0",
+  "description": "Discord bot that reacts to configurable trigger phrases with text, images, gifs, links and embeds.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.5"
+  }
+}

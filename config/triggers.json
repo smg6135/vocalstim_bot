@@ -1,0 +1,95 @@
+{
+  "cooldownSeconds": 3,
+  "defaults": [
+    {
+      "name": "9 plus 10",
+      "match": {
+        "type": "regex",
+        "pattern": "\\b9\\s*\\+\\s*10\\b"
+      },
+      "responses": [
+        {
+          "content": "21",
+          "image": "https://media1.tenor.com/m/MD9-2basfzAAAAAC/whats-nine-plus-ten-21.gif"
+        },
+        {
+          "content": "21. You stupid. 🥜"
+        }
+      ]
+    },
+    {
+      "name": "hello",
+      "match": {
+        "type": "exact",
+        "pattern": "hello bot"
+      },
+      "responses": [
+        {
+          "embed": {
+            "title": "Hey {username}! 👋",
+            "description": "I'm watching this channel. Try saying `9 + 10`.",
+            "color": 5814783,
+            "thumbnail": "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f44b.png"
+          }
+        }
+      ]
+    },
+    {
+      "name": "source",
+      "match": {
+        "type": "contains",
+        "pattern": "source?"
+      },
+      "responses": [
+        {
+          "content": "Here you go:",
+          "embed": {
+            "title": "The docs",
+            "url": "https://discord.com/developers/docs",
+            "description": "Read them. Live them. Love them.",
+            "color": 7506394
+          }
+        }
+      ]
+    },
+    {
+      "name": "shout",
+      "match": {
+        "type": "startsWith",
+        "pattern": "!shout"
+      },
+      "responses": [
+        {
+          "content": "📢 {username} says: {message}",
+          "reply": false
+        }
+      ]
+    }
+  ],
+  "guilds": {
+    "1555139828490965013": {
+      "triggers": [
+        {
+          "name": "gg",
+          "match": {
+            "type": "contains",
+            "pattern": "gg"
+          },
+          "responses": [
+            {
+              "content": "GG fuckin EZ 😜😜\nHey don't say that... 😰😰\nhuh really?? 🫣🫣\nfuggin EZ 😈😈",
+              "image": {
+                "file": "media/1555139828490965013/1790848355613-dc6da60c-hqdefault.jpg"
+              }
+            }
+          ],
+          "createdBy": "big_doggo_best",
+          "createdAt": "2026-10-01T09:52:35.973Z",
+          "updatedBy": "big_doggo_best",
+          "updatedAt": "2026-10-01T09:54:12.911Z"
+        }
+      ],
+      "hidden": []
+    }
+  }
+}
